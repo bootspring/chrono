@@ -22,7 +22,10 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.test_files = Dir.glob("test/**/*")
-  s.add_development_dependency(%q<shoulda>, [">= 0"])
-  s.add_development_dependency(%q<mocha>, [">= 0"])
+  s.add_dependency 'faraday'
+  s.add_dependency 'yajl-ruby'
+  s.add_dependency 'typhoeus'
+  s.add_dependency 'mongo'
+  s.add_dependency 'bson_ext'
 end
 

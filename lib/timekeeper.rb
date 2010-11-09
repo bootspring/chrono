@@ -1,2 +1,1 @@
-module Timekeeper
-end
+require 'timekeeper/version'

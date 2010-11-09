@@ -3,11 +3,16 @@ Timekeeper
 
 About this project...
 
+
 Design
 ------------
 
+
 Installation and Usage
 ------------------------
+
+Client requires 'faraday', 'typhoeus' and 'yajl-ruby'.  Server requires 'mongo' and 'bson_ext'.
+
 
 Author
 ----------
