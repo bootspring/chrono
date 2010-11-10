@@ -21,15 +21,41 @@ class TestServer < MiniTest::Unit::TestCase
     load('foo.bar')
     load('foo.bar')
 
-    get('/query', { :name => 'foo.bar', :start_time => Time.now.utc.to_i - 100, :end_time => Time.now.utc.to_i + 5 })
-    assert_equal 200, last_response.status
-    assert_equal [], Yajl::Parser.parse(last_response.body)
+    get('/query', { :name => 'foo.bar', :start_time => Time.now.utc.to_i - 100, :end_time => Time.now.utc.to_i + 5 }, credentials)
+    assert_equal 200, last_response.status, last_response.body
+    result = Yajl::Parser.parse(last_response.body)
+    assert_equal Array, result.class
+    refute_equal 0, result.size
+    assert_equal Hash, result[0].class
+    assert_equal 5, result[0].size
+  end
+  
+  def test_delete
+    load('foo.bar')
+    load('foo.bar')
+    delete('/metrics', { :name => 'foo.bar', :end_time => Time.now.utc.to_i + 5 }, credentials)
+    assert_equal 200, last_response.status, last_response.errors
+    assert_equal '', last_response.body, last_response.errors
   end
   
   private
   
+  def token_auth(token, options = {})
+    values = ["token=#{token.to_s.inspect}"]
+    options.each do |key, value|
+      values << "#{key}=#{value.to_s.inspect}"
+    end
+    # 21 = "Authorization: Token ".size
+    comma = ",\n#{' ' * 21}"
+    "Token #{values * comma}"
+  end
+  
+  def credentials
+    { 'HTTP_AUTHORIZATION' => token_auth('xyz') }
+  end
+  
   def load(name, value=nil)
-    post('/metrics', { :time => Time.now.utc.to_i, :host => Socket.gethostname, :name => name, :val => (value || 12.to_f) })
+    post('/metrics', { :time => Time.now.utc.to_i, :ip => '192.168.1.12', :name => name, :val => (value || 12.to_f) }, credentials)
     assert_equal 201, last_response.status, last_response.errors
     assert_equal '', last_response.body, last_response.errors
   end
