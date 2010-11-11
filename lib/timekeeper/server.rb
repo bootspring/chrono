@@ -56,19 +56,7 @@ module Timekeeper
     end 
 
     def ip(str)
-      # Benchmark.bmbm do |x|
-      #   x.report 'ipaddr' do
-      #     100_000.times do
-      #       IPAddr.new(str).to_i
-      #     end
-      #   end
-      #   x.report 'str' do
-      #     100_000.times do
-      #       str.split('.').map(&:to_i).pack('cccc').unpack('N')[0]
-      #     end
-      #   end
-      # end
-      str.split('.').map(&:to_i).pack('cccc').unpack('N')[0]
+      str.split('.').inject(0) { |i, a| i << 8 | a.to_i }
     end
   end
 end
