@@ -7,6 +7,10 @@ class TestServer < MiniTest::Unit::TestCase
   def app
     Timekeeper::Server
   end
+  
+  def setup
+    create_app
+  end
 
   def test_default
     get '/'
@@ -21,7 +25,7 @@ class TestServer < MiniTest::Unit::TestCase
     load('foo.bar')
     load('foo.bar')
 
-    get('/query', { :k => 'foo.bar', :start_time => Time.now.utc.to_i - 100, :end_time => Time.now.utc.to_i + 5 }, credentials)
+    get('/metrics', { :k => 'foo.bar', :start_time => Time.now.utc.to_i - 100, :end_time => Time.now.utc.to_i + 5 }, credentials)
     assert_equal 200, last_response.status, last_response.body
     result = Yajl::Parser.parse(last_response.body)
     assert_equal Array, result.class
@@ -52,6 +56,12 @@ class TestServer < MiniTest::Unit::TestCase
   
   def credentials
     { 'HTTP_AUTHORIZATION' => token_auth('xyz') }
+  end
+  
+  def create_app(name='Ninja', token='xyz')
+    post("/applications", :name => name, :token => token)
+    assert_equal 201, last_response.status, last_response.errors
+    assert_equal '', last_response.body, last_response.errors
   end
   
   def load(name, value=nil)

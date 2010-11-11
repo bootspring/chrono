@@ -7,9 +7,10 @@ require 'ipaddr'
 module Timekeeper
   class Server < Sinatra::Base
     set :sessions, false
+    set :port, 31313
     
     include Timekeeper::Auth::Token
-
+    
     get '/' do
       "Timekeeper v#{Timekeeper::VERSION}"
     end
@@ -19,14 +20,26 @@ module Timekeeper
       201
     end
     
-    get '/query' do
-      coll = connection.collection(params['k'])
+    get '/metrics' do
+      coll = metrics_db.collection(params['k'])
       Yajl::Encoder.encode coll.find(query_for(params)).to_a
     end
     
     delete '/metrics' do
-      coll = connection.collection(params['k'])
+      coll = metrics_db.collection(params['k'])
       coll.remove(query_for(params))
+    end
+
+    post '/applications' do
+      apps = master_db.collection('applications')
+      apps.create_index('token', :unique => true)
+      apps.insert(params)
+      201
+    end
+    
+    get '/applications' do
+      apps = master_db.collection('applications')
+      apps.find.to_a.inspect
     end
 
     private
@@ -47,16 +60,26 @@ module Timekeeper
       params['at'] = time('at')
       params['v'] = params['v'].to_f
       params['ip'] = ip(env['REMOTE_ADDR'])
-      coll = connection.collection(params['k'])
+      coll = metrics_db.collection(params['k'])
       coll.insert(params)
     end
     
-    def connection
-      @metrics ||= Mongo::Connection.new.db('metrics')
-    end 
+    def metrics_db
+      @metrics ||= Mongo::Connection.new
+      @metrics.db('metrics')
+    end
+
+    def master_db
+      @master ||= Mongo::Connection.new
+      @master.db("timekeeper_#{environment}")
+    end
 
     def ip(str)
       str.split('.').inject(0) { |i, a| i << 8 | a.to_i }
+    end
+    
+    def environment
+      self.class.environment
     end
   end
 end

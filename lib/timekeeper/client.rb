@@ -11,7 +11,7 @@ module Timekeeper
         builder.adapter  :typhoeus
         builder.response :yajl
       end
-      @conn.token_auth key
+      @conn.token_auth token
     end
     
     def store(metric, value)

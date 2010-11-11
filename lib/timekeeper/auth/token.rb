@@ -50,7 +50,7 @@ module Timekeeper
       def self.included(base)
         base.instance_eval do
 
-          before(/\/.+/) do
+          before(/\/metrics/) do
             auth = ::Rack::Auth::Token::Request.new(env)
             return halt(401, 'No authentication header provided') unless auth.provided?
             return halt(401, 'No token provided') unless auth.token?
@@ -64,7 +64,10 @@ module Timekeeper
 
           helpers do
             def valid?(token)
-              true
+              coll = master_db.collection('applications')
+              result = coll.find_one('token' => token)
+              p result
+              result
             end
           end
 
