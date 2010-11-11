@@ -2,6 +2,7 @@ require 'mongo'
 require 'sinatra/base'
 require 'yajl'
 require 'timekeeper/auth/token'
+require 'ipaddr'
 
 module Timekeeper
   class Server < Sinatra::Base
@@ -19,13 +20,12 @@ module Timekeeper
     end
     
     get '/query' do
-      p params
-      coll = connection.collection(params['name'])
+      coll = connection.collection(params['k'])
       Yajl::Encoder.encode coll.find(query_for(params)).to_a
     end
     
     delete '/metrics' do
-      coll = connection.collection(params['name'])
+      coll = connection.collection(params['k'])
       coll.remove(query_for(params))
     end
 
@@ -33,9 +33,9 @@ module Timekeeper
 
     def query_for(params)
       query = {}
-      query['time'] = {} if params['start_time'] || params['end_time']
-      query['time']["$gte"] = time('start_time') if params['start_time']
-      query['time']["$lt"] = time('end_time') if params['end_time']
+      query['at'] = {} if params['start_time'] || params['end_time']
+      query['at']["$gte"] = time('start_time') if params['start_time']
+      query['at']["$lt"] = time('end_time') if params['end_time']
       query
     end
 
@@ -44,9 +44,10 @@ module Timekeeper
     end
 
     def write
-      params['time'] = time('time')
-      params['val'] = Float(params['val'])
-      coll = connection.collection(params['name'])
+      params['at'] = time('at')
+      params['v'] = params['v'].to_f
+      params['ip'] = ip(env['REMOTE_ADDR'])
+      coll = connection.collection(params['k'])
       coll.insert(params)
     end
     
@@ -54,5 +55,20 @@ module Timekeeper
       @metrics ||= Mongo::Connection.new.db('metrics')
     end 
 
+    def ip(str)
+      # Benchmark.bmbm do |x|
+      #   x.report 'ipaddr' do
+      #     100_000.times do
+      #       IPAddr.new(str).to_i
+      #     end
+      #   end
+      #   x.report 'str' do
+      #     100_000.times do
+      #       str.split('.').map(&:to_i).pack('cccc').unpack('N')[0]
+      #     end
+      #   end
+      # end
+      str.split('.').map(&:to_i).pack('cccc').unpack('N')[0]
+    end
   end
 end
