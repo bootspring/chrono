@@ -1,4 +1,3 @@
-require 'socket'
 require 'faraday'
 
 module Timekeeper
@@ -13,7 +12,7 @@ module Timekeeper
       end
       @conn.token_auth token
     end
-    
+
     def store(metric, value)
       write({ :at => Time.now.utc, :k => metric, :v => value.to_f })
     end

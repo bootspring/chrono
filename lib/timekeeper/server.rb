@@ -2,12 +2,10 @@ require 'mongo'
 require 'sinatra/base'
 require 'yajl'
 require 'timekeeper/auth/token'
-require 'ipaddr'
 
 module Timekeeper
   class Server < Sinatra::Base
     set :sessions, false
-    set :port, 31313
     
     include Timekeeper::Auth::Token
     
