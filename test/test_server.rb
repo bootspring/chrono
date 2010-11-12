@@ -25,19 +25,19 @@ class TestServer < MiniTest::Unit::TestCase
     load('foo.bar')
     load('foo.bar')
 
-    get('/metrics', { :k => 'foo.bar', :start_time => Time.now.utc.to_i - 100, :end_time => Time.now.utc.to_i + 5 }, credentials)
+    get("/metrics/#{credentials}", { :k => 'foo.bar', :start_time => Time.now.utc.to_i - 100, :end_time => Time.now.utc.to_i + 5 })
     assert_equal 200, last_response.status, last_response.body
     result = Yajl::Parser.parse(last_response.body)
     assert_equal Array, result.class
     refute_equal 0, result.size
     assert_equal Hash, result[0].class
-    assert_equal 5, result[0].size
+    assert_equal 5, result[0].size, result[0].inspect
   end
   
   def test_delete
     load('foo.bar')
     load('foo.bar')
-    delete('/metrics', { :k => 'foo.bar', :end_time => Time.now.utc.to_i + 5 }, credentials)
+    delete("/metrics/#{credentials}", { :k => 'foo.bar', :end_time => Time.now.utc.to_i + 5 })
     assert_equal 200, last_response.status, last_response.errors
     assert_equal '', last_response.body, last_response.errors
   end
@@ -55,7 +55,7 @@ class TestServer < MiniTest::Unit::TestCase
   end
   
   def credentials
-    { 'HTTP_AUTHORIZATION' => token_auth('xyz') }
+    'xyz'
   end
   
   def create_app(name='Ninja', token='xyz')
@@ -65,7 +65,7 @@ class TestServer < MiniTest::Unit::TestCase
   end
   
   def load(name, value=nil)
-    post('/metrics', { :at => Time.now.utc.to_i, :k => name, :v => (value || 12.to_f) }, credentials)
+    post("/metrics/#{credentials}", { :at => Time.now.utc.to_i, :k => name, :v => (value || 12.to_f) })
     assert_equal 201, last_response.status, last_response.errors
     assert_equal '', last_response.body, last_response.errors
   end
