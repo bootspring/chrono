@@ -15,6 +15,8 @@ Timekeeper provides the following functionality:
  - Sample Ruby client for the REST API
  - Javascript graphing library
 
+Timekeeper does everything in UTC.  The UI does not have provisions for local time zones; the idea is that distributed team communication is so much easier when everyone uses the same standard time zone.
+
 
 Installation and Usage
 ------------------------

@@ -1,9 +1,9 @@
 require 'mongo'
 require 'sinatra/base'
 require 'yajl'
-require 'chronic'
 require 'active_support/core_ext/time/zones'
 require 'active_support/core_ext/time/calculations'
+require 'chronic'
 
 module Timekeeper
   class Server < Sinatra::Base
@@ -28,11 +28,11 @@ module Timekeeper
       authorize do
         name = params[:name] || params[:k]
         coll = metrics_db.collection(name)
-        results = nil
+        results = []
         coll.find(query_for(params), :fields => %w(k v at)) do |cursor|
-          results = cursor.to_a
+          results = cursor.map { |x| x.delete('_id'); x }
         end
-        content_type 'application/javascript'
+        content_type 'application/json'
         expires 300, :public
         Yajl::Encoder.encode results
       end
