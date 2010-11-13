@@ -1,7 +1,6 @@
 require 'mongo'
 require 'sinatra/base'
 require 'yajl'
-require 'timekeeper/auth/token'
 require 'chronic'
 require 'active_support/core_ext/time/zones'
 require 'active_support/core_ext/time/calculations'
@@ -9,6 +8,7 @@ require 'active_support/core_ext/time/calculations'
 module Timekeeper
   class Server < Sinatra::Base
     set :sessions, false
+    set :public, File.dirname(__FILE__) + '/../../public'
     
     configure do
       Time.zone = "UTC"
