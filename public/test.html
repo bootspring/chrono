@@ -1,0 +1,61 @@
+<html>
+  <head>
+    <title>Chrono Test</title>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
+    <script type="text/javascript" src="protovis-d3.2.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript+protovis">
+    
+    var dataURL = "http://localhost:9393/metrics?k=cc_debits&start_time=1+day+ago&token=xyz";
+    $.getJSON(dataURL, function(data) {
+      var variables = ["cc_debits"];
+
+      (function() {
+        data.forEach(function(d) { d.at = new Date(d.at); });
+      })();
+
+      var w = 640,
+          h = 480,
+          x = pv.Scale.linear(data, function(d) { return d.at; }).range(0, w),
+          y = pv.Scale.linear(0, 70000).range(0, h),
+          fill = pv.colors("lightblue", "darkgray", "lightpink");
+
+      var vis = new pv.Panel()
+          .width(w)
+          .height(h)
+          .margin(19.5)
+          .right(40);
+
+      vis.add(pv.Layout.Stack)
+          .layers(variables)
+          .values(data)
+          .x(function(d) { return x(d.at); })
+          .y(function(d, t) { return y(d.v); })
+        .layer.add(pv.Area)
+          .fillStyle(fill.by(pv.parent))
+          .strokeStyle(function() { return this.fillStyle().darker(); })
+          .lineWidth(1);
+
+      vis.add(pv.Label)
+          .data(x.ticks())
+          .left(x)
+          .bottom(0)
+          .textBaseline("top")
+          .textMargin(5)
+          .text(pv.Format.date("%H"));
+      
+      vis.add(pv.Rule)
+          .data(y.ticks(10))
+          .bottom(y)
+          .strokeStyle(function(i) { return (i ? "rgba(255, 255, 255, .7)" : "black"); })
+        .anchor("right").add(pv.Label)
+          .textMargin(6);
+
+      vis.render();
+      console.log('done');
+    });
+
+    </script>
+  </body>
+</html>

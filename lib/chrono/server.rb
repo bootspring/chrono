@@ -19,12 +19,14 @@ module Chrono
       "Chrono v#{Chrono::VERSION}"
     end
     
-    post '/metrics/:token' do
-      write
-      201
+    post '/metrics' do
+      authorize do
+        write
+        201
+      end
     end
     
-    get '/metrics/:token' do
+    get '/metrics' do
       authorize do
         name = params[:name] || params[:k]
         coll = metrics_db.collection(name)
@@ -38,7 +40,7 @@ module Chrono
       end
     end
     
-    delete '/metrics/:token' do
+    delete '/metrics' do
       authorize do
         coll = metrics_db.collection(params['k'])
         coll.remove(query)
@@ -59,7 +61,8 @@ module Chrono
 
     private
 
-    def authorize(token=params[:token])
+    def authorize
+      token = params['token']
       return halt(401, 'No token provided') unless token
 
       coll = master_db.collection('applications')
@@ -102,7 +105,7 @@ module Chrono
 
     def master_db
       @master ||= Mongo::Connection.new
-      @master.db("timekeeper_#{environment}")
+      @master.db("chrono_#{environment}")
     end
 
     def ip(str)

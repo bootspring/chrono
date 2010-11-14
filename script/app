@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require 'mongo'
+
+# ./app Name Token
+conn = Mongo::Connection.new
+db = conn.db("chrono_#{ENV['RACK_ENV'] || 'development'}")
+coll = db.collection('applications')
+coll.create_index('token', :unique => true)
+p coll.insert(:name => ARGV[0], :token => ARGV[1])
+p coll.find.to_a
+
