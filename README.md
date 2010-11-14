@@ -1,13 +1,13 @@
-Timekeeper
+Chrono
 =========
 
-Timekeeper is a storage and query server for time-series 'application' metrics.  Systems like Ganglia, Cactus and Nagios work well for 'technical' metrics like CPU usage, load average, RAM usage, etc.  Timekeeper wants to store the application metrics you'd use to monitor the health and well being of your website, for instance, # of logins, credit card transactions, search queries, etc.  Essentially anything you'd want to track by hostname (per machine) would be considered a 'technical' metric and not appropriate for Timekeeper.
+Chrono is a storage and query server for time-series 'application' metrics.  Systems like Ganglia, Cactus and Nagios work well for 'technical' metrics like CPU usage, load average, RAM usage, etc.  Chrono wants to store the application metrics you'd use to monitor the health and well being of your website, for instance, # of logins, credit card transactions, search queries, etc.  Essentially anything you'd want to track by hostname (per machine) would be considered a 'technical' metric and not appropriate for Chrono.
 
 
 Design
 ------------
 
-Timekeeper provides the following functionality:
+Chrono provides the following functionality:
 
  - Server which provides REST APIs to write metric values and read aggregate metric data
  - Automatic aggregation of metric values into 5, 15, 60, 240 and 1440 minute buckets.
@@ -15,7 +15,7 @@ Timekeeper provides the following functionality:
  - Sample Ruby client for the REST API
  - Javascript graphing library
 
-Timekeeper does everything in UTC.  The UI does not have provisions for local time zones; the idea is that distributed team communication is so much easier when everyone uses the same standard time zone.
+Chrono does everything in UTC.  The UI does not have provisions for local time zones; the idea is that distributed team communication is so much easier when everyone uses the same standard time zone.
 
 
 Installation and Usage
@@ -29,7 +29,7 @@ The server and client are all included in the gem.  The Server uses Sinatra + Mo
 Author
 ----------
 
-Mike Perham, mperham@gmail.com, [mikeperham.com](http://mikeperham.com), [@mperham](http://twitter.com/mperham).  I provide consulting services through my company, [Bootspring](http://bootspring.com).  If you need help with Timekeeper, Ruby performance and scalability, or general Ruby on Rails development, give us a ring.
+Mike Perham, mperham@gmail.com, [mikeperham.com](http://mikeperham.com), [@mperham](http://twitter.com/mperham).  I provide consulting services through my company, [Bootspring](http://bootspring.com).  If you need help with Chrono, Ruby performance and scalability, or general Ruby on Rails development, give us a ring.
 
 
 Copyright

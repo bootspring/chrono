@@ -5,7 +5,7 @@ class TestServer < MiniTest::Unit::TestCase
   include Rack::Test::Methods
   
   def app
-    Timekeeper::Server
+    Chrono::Server
   end
   
   def setup
@@ -14,7 +14,7 @@ class TestServer < MiniTest::Unit::TestCase
 
   def test_default
     get '/'
-    assert_equal "Timekeeper v#{Timekeeper::VERSION}", last_response.body
+    assert_equal "Chrono v#{Chrono::VERSION}", last_response.body
   end
   
   def test_metrics_push
@@ -26,12 +26,12 @@ class TestServer < MiniTest::Unit::TestCase
     load('foo.bar')
 
     get("/metrics/#{credentials}", { :k => 'foo.bar', :start_time => Time.now.utc.to_i - 100, :end_time => Time.now.utc.to_i + 5 })
-    assert_equal 200, last_response.status, last_response.body
+    assert_equal 200, last_response.status, last_response.errors
     result = Yajl::Parser.parse(last_response.body)
     assert_equal Array, result.class
     refute_equal 0, result.size
     assert_equal Hash, result[0].class
-    assert_equal 5, result[0].size, result[0].inspect
+    assert_equal 3, result[0].size, result[0].inspect
   end
   
   def test_delete

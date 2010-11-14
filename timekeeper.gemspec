@@ -4,7 +4,7 @@ require 'timekeeper/version'
 
 Gem::Specification.new do |s|
   s.name = %q{timekeeeper}
-  s.version = Timekeeper::VERSION
+  s.version = Chrono::VERSION
 
   s.authors = ["Mike Perham"]
   s.date = Time.now.utc.strftime("%Y-%m-%d")

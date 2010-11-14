@@ -5,7 +5,7 @@ require 'active_support/core_ext/time/zones'
 require 'active_support/core_ext/time/calculations'
 require 'chronic'
 
-module Timekeeper
+module Chrono
   class Server < Sinatra::Base
     set :sessions, false
     set :public, File.dirname(__FILE__) + '/../../public'
@@ -16,7 +16,7 @@ module Timekeeper
     end
     
     get '/' do
-      "Timekeeper v#{Timekeeper::VERSION}"
+      "Chrono v#{Chrono::VERSION}"
     end
     
     post '/metrics/:token' do
@@ -29,7 +29,7 @@ module Timekeeper
         name = params[:name] || params[:k]
         coll = metrics_db.collection(name)
         results = []
-        coll.find(query_for(params), :fields => %w(k v at)) do |cursor|
+        coll.find(query, :fields => %w(k v at)) do |cursor|
           results = cursor.map { |x| x.delete('_id'); x }
         end
         content_type 'application/json'
@@ -41,7 +41,7 @@ module Timekeeper
     delete '/metrics/:token' do
       authorize do
         coll = metrics_db.collection(params['k'])
-        coll.remove(query_for(params))
+        coll.remove(query)
       end
     end
 
@@ -72,7 +72,7 @@ module Timekeeper
       end
     end
 
-    def query_for(params)
+    def query
       query = {}
       query['at'] = {} if params['start_time'] || params['end_time']
       query['at']["$gte"] = chronic('start_time') if params['start_time']
@@ -85,7 +85,8 @@ module Timekeeper
     end
 
     def chronic(name)
-      Chronic.parse(params[name]).time
+      parsed = Chronic.parse(params[name])
+      parsed ? parsed.time : Time.at(Integer(params[name])).utc
     end
 
     def write

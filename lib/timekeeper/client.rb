@@ -1,6 +1,6 @@
 require 'faraday'
 
-module Timekeeper
+module Chrono
   class Client
 
     def initialize(token, location='http://localhost:31313')
