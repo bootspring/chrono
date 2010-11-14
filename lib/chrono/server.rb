@@ -1,4 +1,5 @@
 require 'mongo'
+require 'redis'
 require 'sinatra/base'
 require 'yajl'
 require 'active_support/core_ext/time/zones'
@@ -18,17 +19,37 @@ module Chrono
     get '/' do
       "Chrono v#{Chrono::VERSION}"
     end
-    
-    post '/metrics' do
+
+    get '/apps' do
+      apps = master_db.collection('applications')
+      apps.find.to_a.inspect
+    end
+
+    post '/apps' do
+      apps = master_db.collection('applications')
+      apps.create_index('token', :unique => true)
+      apps.insert(params)
+      201
+    end
+
+    get '/apps/:token/metrics' do
+      authorize do
+        content_type 'application/json'
+        expires 300, :public
+        Yajl::Encoder.encode redis.smembers("metrics-#{app_token}")
+      end
+    end
+
+    post '/apps/:token/metrics' do
       authorize do
         write
         201
       end
     end
-    
-    get '/metrics' do
+
+    get '/apps/:token/metrics/:name' do
       authorize do
-        name = params[:name] || params[:k]
+        name = params['name']
         coll = metrics_db.collection(name)
         results = []
         coll.find(query, :fields => %w(k v at)) do |cursor|
@@ -39,36 +60,26 @@ module Chrono
         Yajl::Encoder.encode results
       end
     end
-    
-    delete '/metrics' do
+
+    delete '/apps/:token/metrics/:name' do
       authorize do
-        coll = metrics_db.collection(params['k'])
+        coll = metrics_db.collection(params['name'])
         coll.remove(query)
       end
     end
 
-    post '/applications' do
-      apps = master_db.collection('applications')
-      apps.create_index('token', :unique => true)
-      apps.insert(params)
-      201
-    end
-    
-    get '/applications' do
-      apps = master_db.collection('applications')
-      apps.find.to_a.inspect
-    end
-
     private
+    
+    def app_token
+      params['token']
+    end
 
     def authorize
-      token = params['token']
-      return halt(401, 'No token provided') unless token
+      return halt(401, 'No token provided') unless app_token
 
       coll = master_db.collection('applications')
-      app = coll.find_one('token' => token)
+      @app = coll.find_one('token' => app_token)
       if app
-        env['REMOTE_USER'] = token
         yield
       else
         halt(402, 'Unauthorized, please verify token')
@@ -96,6 +107,8 @@ module Chrono
       doc = { :at => time('at'), :v => params['v'].to_f, :ip => ip(env['REMOTE_ADDR']), :k => params['k'] }
       coll = metrics_db.collection(doc[:k])
       coll.insert(doc)
+      
+      redis.sadd("metrics-#{app_token}", params['k'])
     end
     
     def metrics_db
@@ -106,6 +119,10 @@ module Chrono
     def master_db
       @master ||= Mongo::Connection.new
       @master.db("chrono_#{environment}")
+    end
+    
+    def redis
+      @redis ||= Redis.new
     end
 
     def ip(str)
