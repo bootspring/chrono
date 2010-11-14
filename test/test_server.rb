@@ -18,14 +18,14 @@ class TestServer < MiniTest::Unit::TestCase
   end
   
   def test_metrics_push
-    load('foo.bar')
+    load('foo_bar')
   end
   
   def test_query
-    load('foo.bar')
-    load('foo.bar')
+    load('foo_bar')
+    load('foo_bar')
 
-    get("/apps/#{credentials}/metrics/foo.bar", { :start_time => Time.now.utc.to_i - 100, :end_time => Time.now.utc.to_i + 5 })
+    get("/apps/#{credentials}/metrics/foo_bar", { :start_time => Time.now.utc.to_i - 100, :end_time => Time.now.utc.to_i + 5 })
     assert_equal 200, last_response.status, last_response.errors
     result = Yajl::Parser.parse(last_response.body)
     assert_equal Array, result.class
@@ -35,13 +35,18 @@ class TestServer < MiniTest::Unit::TestCase
   end
   
   def test_delete
-    load('foo.bar')
-    load('foo.bar')
-    delete("/apps/#{credentials}/metrics/foo.bar", { :end_time => Time.now.utc.to_i + 5 })
+    load('foo_bar')
+    load('foo_bar')
+    delete("/apps/#{credentials}/metrics/foo_bar", { :end_time => Time.now.utc.to_i + 5 })
     assert_equal 200, last_response.status, last_response.errors
     assert_equal '', last_response.body, last_response.errors
   end
   
+  def test_invalid_metric_name
+    get("/apps/#{credentials}/metrics/foo.bar", { :start_time => Time.now.utc.to_i - 100, :end_time => Time.now.utc.to_i + 5 })
+    assert_equal 401, last_response.status, last_response.errors
+  end
+
   private
   
   def credentials
@@ -55,7 +60,7 @@ class TestServer < MiniTest::Unit::TestCase
   end
   
   def load(name, value=nil)
-    post("/apps/#{credentials}/metrics", { :at => Time.now.utc.to_i, :k => name, :v => (value || 12.to_f) })
+    post("/apps/#{credentials}/metrics", Yajl::Encoder.encode([{ :at => Time.now.utc.to_i, :k => name, :v => (value || 12.to_f) }]))
     assert_equal 201, last_response.status, last_response.errors
     assert_equal '', last_response.body, last_response.errors
   end

@@ -50,6 +50,7 @@ module Chrono
     get '/apps/:token/metrics/:name' do
       authorize do
         name = params['name']
+        halt(401, "Invalid metric name: #{name}") if name !~ /\A\w+\Z/
         coll = metrics_db.collection(name)
         results = []
         coll.find(query, :fields => %w(k v at)) do |cursor|
@@ -94,8 +95,8 @@ module Chrono
       query
     end
 
-    def time(name)
-      Time.at(Integer(params[name])).utc
+    def time(value)
+      Time.at(Integer(value)).utc
     end
 
     def chronic(name)
@@ -103,12 +104,27 @@ module Chrono
       parsed ? parsed.time : Time.at(Integer(params[name])).utc
     end
 
-    def write
-      doc = { :at => time('at'), :v => params['v'].to_f, :ip => ip(env['REMOTE_ADDR']), :k => params['k'] }
+    def insert_one(hash)
+      halt(401, "Invalid metric name: #{hash['k']}") if hash['k'] !~ /\A\w+\Z/
+      doc = { :at => time(hash['at']), :v => hash['v'].to_f, :ip => ip(env['REMOTE_ADDR']), :k => hash['k'] }
       coll = metrics_db.collection(doc[:k])
       coll.insert(doc)
+    
+      redis.sadd("metrics-#{app_token}", hash['k'])
+    end
       
-      redis.sadd("metrics-#{app_token}", params['k'])
+    def write
+      metrics = Yajl::Parser.parse(env['rack.input'])
+      case metrics
+      when Hash
+        insert_one(metrics)
+      when Array
+        metrics.each do |metric|
+          insert_one(metric)
+        end
+      else
+        halt(500, "#{metrics.class.name}")
+      end
     end
     
     def metrics_db
