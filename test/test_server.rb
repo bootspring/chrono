@@ -1,5 +1,5 @@
 require 'helper'
-require 'timekeeper/server'
+require 'chrono/server'
 
 class TestServer < MiniTest::Unit::TestCase
   include Rack::Test::Methods

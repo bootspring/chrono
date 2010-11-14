@@ -1,5 +1,5 @@
 require 'helper'
-require 'timekeeper/client'
+require 'chrono/client'
 
 class TestClient < MiniTest::Unit::TestCase
 end

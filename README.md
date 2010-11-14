@@ -21,7 +21,7 @@ Chrono does everything in UTC.  The UI does not have provisions for local time z
 Installation and Usage
 ------------------------
 
-    gem install timekeeper
+    gem install chrono
 
 The server and client are all included in the gem.  The Server uses Sinatra + MongoDB.
 
