@@ -1,9 +1,9 @@
 lib = File.expand_path('../lib/', __FILE__)
 $:.unshift lib unless $:.include?(lib)
-require 'timekeeper/version'
+require 'chrono/version'
 
 Gem::Specification.new do |s|
-  s.name = %q{timekeeeper}
+  s.name = %q{chrono}
   s.version = Chrono::VERSION
 
   s.authors = ["Mike Perham"]
@@ -16,9 +16,9 @@ Gem::Specification.new do |s|
      "History.md",
      "Rakefile",
      "Gemfile",
-     "timekeeper.gemspec",
+     "chrono.gemspec",
   ]
-  s.homepage = %q{http://github.com/mperham/timekeeper}
+  s.homepage = %q{http://github.com/mperham/chrono}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.test_files = Dir.glob("test/**/*")
@@ -27,5 +27,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'typhoeus'
   s.add_dependency 'mongo'
   s.add_dependency 'bson_ext'
+  s.add_dependency 'chronic'
 end
 
