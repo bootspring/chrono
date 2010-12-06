@@ -6,11 +6,12 @@ require 'active_support/core_ext/time/zones'
 require 'active_support/core_ext/time/calculations'
 require 'chronic'
 
+
 module Chrono
   class Server < Sinatra::Base
     set :sessions, false
     set :public, File.dirname(__FILE__) + '/../../public'
-    
+
     configure do
       Time.zone = "UTC"
       Chronic.time_class = Time.zone
@@ -129,12 +130,12 @@ module Chrono
     
     def metrics_db
       @metrics ||= Mongo::Connection.new
-      @metrics.db('metrics')
+      @metrics.db("chrono_metrics_#{environment}")
     end
 
     def master_db
       @master ||= Mongo::Connection.new
-      @master.db("chrono_#{environment}")
+      @master.db("chrono_master_#{environment}")
     end
     
     def redis

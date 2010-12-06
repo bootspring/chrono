@@ -3,11 +3,22 @@
     <title>Chrono Test</title>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
     <script type="text/javascript" src="protovis-d3.2.js"></script>
+    <script type="text/javascript" src="/javascripts/graph.js"></script>
   </head>
   <body>
     <script type="text/javascript+protovis">
     
-    var dataURL = "http://localhost:9393/metrics?k=cc_debits&start_time=1+day+ago&token=xyz";
+    var w = 640,
+        h = 480,
+        fill = pv.colors("lightblue", "darkgray", "lightpink");
+
+    var vis = new pv.Panel()
+        .width(w)
+        .height(h)
+        .margin(19.5)
+        .right(40);
+
+    var dataURL = "http://localhost:9393/apps/xyz/metrics/cc_debits?start_time=1+day+ago";
     $.getJSON(dataURL, function(data) {
       var variables = ["cc_debits"];
 
@@ -15,27 +26,39 @@
         data.forEach(function(d) { d.at = new Date(d.at); });
       })();
 
-      var w = 640,
-          h = 480,
-          x = pv.Scale.linear(data, function(d) { return d.at; }).range(0, w),
-          y = pv.Scale.linear(0, 70000).range(0, h),
-          fill = pv.colors("lightblue", "darkgray", "lightpink");
+      var x = pv.Scale.linear(data, function(d) { return d.at; }).range(0, w),
+          y = pv.Scale.linear(0, 70000).range(0, h);
 
-      var vis = new pv.Panel()
-          .width(w)
-          .height(h)
-          .margin(19.5)
-          .right(40);
+      // var weeks = 5;
+      // for (i=1;i<=weeks;i++) {
+      //   var cur = 1 + (7*i);
+      //   var weekURL = "http://localhost:9393/apps/xyz/metrics/cc_debits?start_time=" + cur + "+days+ago&end_time=" + (cur-1) + "+days+ago";
+      //   $.getJSON(weekURL, function(week_data) {
+      // 
+      //     (function() {
+      //       week_data.forEach(function(d) { d.at = new Date(d.at); });
+      //     })();
+      //     
+      // }
 
-      vis.add(pv.Layout.Stack)
-          .layers(variables)
-          .values(data)
-          .x(function(d) { return x(d.at); })
-          .y(function(d, t) { return y(d.v); })
-        .layer.add(pv.Area)
-          .fillStyle(fill.by(pv.parent))
-          .strokeStyle(function() { return this.fillStyle().darker(); })
-          .lineWidth(1);
+      vis.add(pv.Bar) // visible bar
+        .data(data)
+        .width(function(d) { return 40; })
+        .height(function(d) { return y(d.v); })
+        .
+        
+        // .fillStyle(function(d) focusState.barColor(this.parent.active(), d, true, ["orange", "#aac56c", "#e2a8a5", "#D7F09E"]))
+        // .strokeStyle(function(d) focusState.barColor(this.parent.active(), d, false, ["#cf7c06", "#839950", "#cf5d58", "#aac56c"]))
+
+      // vis.add(pv.Layout.Stack)
+      //     .layers(variables)
+      //     .values(data)
+      //     .x(function(d) { return x(d.at); })
+      //     .y(function(d, t) { return y(d.v); })
+      //   .layer.add(pv.Area)
+      //     .fillStyle(fill.by(pv.parent))
+      //     .strokeStyle(function() { return this.fillStyle().darker(); })
+      //     .lineWidth(1);
 
       vis.add(pv.Label)
           .data(x.ticks())
@@ -53,7 +76,6 @@
           .textMargin(6);
 
       vis.render();
-      console.log('done');
     });
 
     </script>
