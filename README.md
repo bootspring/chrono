@@ -23,13 +23,22 @@ Installation and Usage
 
     gem install chrono
 
-The server and client are all included in the gem.  The Server uses Sinatra + MongoDB.
+The server and client are all included in the gem.  The server uses Sinatra + MongoDB + Redis.
 
+
+Running
+------------
+
+For testing and evaluation you can run the server as a normal process by running:
+
+    chrono
+
+For production purposes we recommend using Passenger, Unicorn or another Rack container.  Please see their documentation for how to install a normal Rack application.
 
 Author
 ----------
 
-Mike Perham, mperham@gmail.com, [mikeperham.com](http://mikeperham.com), [@mperham](http://twitter.com/mperham).  I provide consulting services through my company, [Bootspring](http://bootspring.com).  If you need help with Chrono, Ruby performance and scalability, or general Ruby on Rails development, give us a ring.
+Mike Perham, mperham@gmail.com, [mikeperham.com](http://mikeperham.com), [@mperham](http://twitter.com/mperham).
 
 
 Copyright

@@ -29,5 +29,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'bson_ext'
   s.add_dependency 'chronic'
   s.add_dependency 'rack-coffee'
+  s.add_dependency 'redis'
 end
 

@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+# ./bin/myapp
+
+$LOAD_PATH << File.expand_path(File.dirname(__FILE__) + "/../lib")
+
+require "chrono/server"
+require "chrono/runner"
+
+Chrono::Runner.new(Sinatra::Application, 'chrono')

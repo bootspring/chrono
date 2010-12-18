@@ -7,4 +7,4 @@ require 'rack/coffee'
 use Rack::Coffee, {
   :root => 'public'
 }
-run Chrono::Server
+Chrono::Server.run!
