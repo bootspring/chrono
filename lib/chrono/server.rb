@@ -5,7 +5,7 @@ require 'yajl'
 require 'active_support/core_ext/time/zones'
 require 'active_support/core_ext/time/calculations'
 require 'chronic'
-
+require 'tzinfo'
 
 module Chrono
   class Server < Sinatra::Base
@@ -13,7 +13,8 @@ module Chrono
     set :public, File.dirname(__FILE__) + '/../../public'
 
     configure do
-      Time.zone = "UTC"
+      Time.zone = TZInfo::Timezone.get("UTC")
+      Time.zone_default = TZInfo::Timezone.get("UTC")
       Chronic.time_class = Time.zone
     end
     

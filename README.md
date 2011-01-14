@@ -25,14 +25,22 @@ Installation and Usage
 
 The server and client are all included in the gem.  The Server uses Sinatra + MongoDB.
 
+On OSX, you can use Homebrew to install the required daemons:
+
+    brew install mongodb
+    brew install redis
+    
+	mongod run --config /usr/local/Cellar/mongodb/1.6.5-x86_64/mongod.conf
+	redis-server /usr/local/etc/redis.conf
+
 
 Author
 ----------
 
-Mike Perham, mperham@gmail.com, [mikeperham.com](http://mikeperham.com), [@mperham](http://twitter.com/mperham).  I provide consulting services through my company, [Bootspring](http://bootspring.com).  If you need help with Chrono, Ruby performance and scalability, or general Ruby on Rails development, give us a ring.
+Mike Perham, mperham@gmail.com, [mikeperham.com](http://mikeperham.com), [@mperham](http://twitter.com/mperham)
 
 
 Copyright
 -----------
 
-Copyright (c) 2010 Mike Perham. See LICENSE for details.
+Copyright (c) 2011 Mike Perham. See LICENSE for details.
