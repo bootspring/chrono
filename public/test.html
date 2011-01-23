@@ -7,17 +7,17 @@
   <body>
     <script type="text/javascript+protovis">
     
-    var w = 640,
-        h = 480,
+    var w = 960,
+        h = 740,
         fill = pv.colors("lightblue", "darkgray", "lightpink");
 
     var vis = new pv.Panel()
         .width(w)
         .height(h)
-        .margin(19.5)
+        .margin(20)
         .right(40);
 
-    var dataURL = "http://localhost:9393/apps/xyz/metrics/cc_debits?start_time=1+day+ago";
+    var dataURL = "/apps/xyz/metrics/cc_debits?start_time=1+day+ago";
     $.getJSON(dataURL, function(data) {
       var variables = ["cc_debits"];
 
@@ -25,17 +25,22 @@
         data.forEach(function(d) { d.at = new Date(d.at); });
       })();
 
-      var x = pv.Scale.linear(data, function(d) { return d.at; }).range(0, w),
+      var x = pv.Scale.linear(data, function(d) { return d.at; }).range(0, w - 40),
           y = pv.Scale.linear(0, 70000).range(0, h);
 
       vis.add(pv.Bar) // visible bar
         .data(data)
         .bottom(0)
-        .width(function(d) { return 40; })
+        .width(function(d) { return 20; })
         .height(function(d) { return y(d.v); })
 		    .left(function(d) { return x(d.at); })
-				.fillStyle(fill);
-        
+        .title(function(d) { return d.v; })
+        .def("i", -1)
+        .event("mouseover", function() { return this.i(this.index); })
+        .event("mouseout", function() { return this.i(-1); })
+        .fillStyle(function() { return this.i() == this.index ? "yellow" : "lightgreen"; })
+        .strokeStyle(function() { return this.fillStyle().darker(); });
+
       vis.add(pv.Label)
           .data(x.ticks())
           .left(x)
