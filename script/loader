@@ -4,7 +4,7 @@ require 'mongo'
 require 'active_support/all'
 
 conn = Mongo::Connection.new
-db = conn.db('metrics')
+db = conn.db('chrono_metrics_development')
 coll = db.collection('cc_debits')
 coll.create_index('at')
 coll.remove
