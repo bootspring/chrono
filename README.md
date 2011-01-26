@@ -33,6 +33,11 @@ On OSX, you can use Homebrew to install the required daemons:
 	mongod run --config /usr/local/Cellar/mongodb/1.6.5-x86_64/mongod.conf
 	redis-server /usr/local/etc/redis.conf
 
+I use shotgun as my Rack server, to reload the code between requests for development purposes:
+
+    gem install shotgun
+    shotgun
+
 
 Author
 ----------
