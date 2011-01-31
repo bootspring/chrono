@@ -2,63 +2,72 @@
   <head>
     <title>Chrono Test</title>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
-    <script type="text/javascript" src="protovis-d3.2.js"></script>
-    <script type="text/javascript" src="/javascripts/graph.js"></script>
+    <script type="text/javascript" src="protovis.js"></script>
   </head>
   <body>
     <script type="text/javascript+protovis">
+    Array.prototype.sum = function() {
+      return this.reduce(function(a, b) { return a + b; });
+    }
+    Array.prototype.average = function() {
+      return this.sum() / this.length;
+    }
+    Array.prototype.sample_variance = function() {
+      var avg = this.average();
+      var summ = 0;
+      for(var idx = 0; idx < this.length; idx++) {
+        summ += Math.pow((this[idx] - avg), 2);
+      }
+      return (summ / this.length);
+    }
+    Array.prototype.stdev = function() {
+      return Math.sqrt(this.sample_variance());
+    }
     
-    var w = 640,
-        h = 480,
+    var w = 960,
+        h = 740,
         fill = pv.colors("lightblue", "darkgray", "lightpink");
 
     var vis = new pv.Panel()
         .width(w)
         .height(h)
-        .margin(19.5)
+        .margin(20)
         .right(40);
 
-    var dataURL = "http://localhost:9393/apps/xyz/metrics/cc_debits?start_time=1+day+ago";
+    var dataURL = "/apps/xyz/metrics/cc_debits?start_time=1+day+ago&end_time=1+minute+ago&previous=5";
     $.getJSON(dataURL, function(data) {
       var variables = ["cc_debits"];
 
       (function() {
-        data.forEach(function(d) { d.at = new Date(d.at); });
+        data[0].forEach(function(d, idx) {
+          d.at = new Date(d.at);
+          d.prev = [data[1][idx].v, data[2][idx].v, data[3][idx].v, data[4][idx].v, data[5][idx].v]
+        });
       })();
 
-      var x = pv.Scale.linear(data, function(d) { return d.at; }).range(0, w),
+      var x = pv.Scale.linear(data[0], function(d) { return d.at; }).range(0, w - 40),
           y = pv.Scale.linear(0, 70000).range(0, h);
 
-      // var weeks = 5;
-      // for (i=1;i<=weeks;i++) {
-      //   var cur = 1 + (7*i);
-      //   var weekURL = "http://localhost:9393/apps/xyz/metrics/cc_debits?start_time=" + cur + "+days+ago&end_time=" + (cur-1) + "+days+ago";
-      //   $.getJSON(weekURL, function(week_data) {
-      // 
-      //     (function() {
-      //       week_data.forEach(function(d) { d.at = new Date(d.at); });
-      //     })();
-      //     
-      // }
+      vis.add(pv.Area)
+          .data(data[0])
+          .height(function(d) { return y(d.prev.stdev()*4); })
+          .bottom(function(d) { return y(d.v - (d.prev.stdev()*2)); })
+  		    .left(function(d) { return x(d.at) + 10; })
+          .fillStyle(function() { return 'rgba(224, 224, 192, .7)'; })
+          .strokeStyle(function() { return this.fillStyle().darker(); });
 
       vis.add(pv.Bar) // visible bar
-        .data(data)
-        .width(function(d) { return 40; })
+        .data(data[0])
+        .bottom(0)
+        .width(function(d) { return 20; })
         .height(function(d) { return y(d.v); })
-        .
-        
-        // .fillStyle(function(d) focusState.barColor(this.parent.active(), d, true, ["orange", "#aac56c", "#e2a8a5", "#D7F09E"]))
-        // .strokeStyle(function(d) focusState.barColor(this.parent.active(), d, false, ["#cf7c06", "#839950", "#cf5d58", "#aac56c"]))
-
-      // vis.add(pv.Layout.Stack)
-      //     .layers(variables)
-      //     .values(data)
-      //     .x(function(d) { return x(d.at); })
-      //     .y(function(d, t) { return y(d.v); })
-      //   .layer.add(pv.Area)
-      //     .fillStyle(fill.by(pv.parent))
-      //     .strokeStyle(function() { return this.fillStyle().darker(); })
-      //     .lineWidth(1);
+		    .left(function(d) { return x(d.at); })
+        .title(function(d) { return d.v; })
+        .def("i", -1)
+        .event("mouseover", function() { return this.i(this.index); })
+        .event("mouseout", function() { return this.i(-1); })
+        .fillStyle(function() { return this.i() == this.index ? "yellow" : "lightgreen"; })
+        .strokeStyle(function() { return this.fillStyle().darker(); });
 
       vis.add(pv.Label)
           .data(x.ticks())

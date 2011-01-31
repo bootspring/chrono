@@ -30,5 +30,10 @@ Gem::Specification.new do |s|
   s.add_dependency 'chronic'
   s.add_dependency 'rack-coffee'
   s.add_dependency 'redis'
+  s.add_dependency 'sinatra'
+  s.add_dependency 'i18n'
+  s.add_dependency 'tzinfo'
+  s.add_dependency 'activesupport', '>= 3.0.0'
+  s.add_development_dependency 'rack-test'
 end
 

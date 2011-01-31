@@ -4,8 +4,10 @@ require 'sinatra/base'
 require 'yajl'
 require 'active_support/core_ext/time/zones'
 require 'active_support/core_ext/time/calculations'
+require 'active_support/core_ext/date/calculations'
+require 'active_support/core_ext/numeric/time'
 require 'chronic'
-
+require 'tzinfo'
 
 module Chrono
   class Server < Sinatra::Base
@@ -13,7 +15,8 @@ module Chrono
     set :public, File.dirname(__FILE__) + '/../../public'
 
     configure do
-      Time.zone = "UTC"
+      Time.zone = TZInfo::Timezone.get("UTC")
+      Time.zone_default = TZInfo::Timezone.get("UTC")
       Chronic.time_class = Time.zone
     end
     
@@ -55,7 +58,15 @@ module Chrono
         coll = metrics_db.collection(name)
         results = []
         coll.find(query, :fields => %w(k v at)) do |cursor|
-          results = cursor.map { |x| x.delete('_id'); x }
+          results[0] = cursor.map { |x| x.delete('_id'); x }
+        end
+        if params[:previous]
+          params[:previous].to_i.times do |x|
+            idx = x + 1
+            coll.find(query(-idx.weeks.to_i), :fields => %w(k v at)) do |cursor|
+              results[idx] = cursor.map { |x| x.delete('_id'); x }
+            end
+          end
         end
         content_type 'application/json'
         expires 300, :public
@@ -88,11 +99,11 @@ module Chrono
       end
     end
 
-    def query
+    def query(offset=0)
       query = {}
       query['at'] = {} if params['start_time'] || params['end_time']
-      query['at']["$gte"] = chronic('start_time') if params['start_time']
-      query['at']["$lt"] = chronic('end_time') if params['end_time']
+      query['at']["$gte"] = chronic('start_time') + offset if params['start_time']
+      query['at']["$lt"] = chronic('end_time') + offset if params['end_time']
       query
     end
 
