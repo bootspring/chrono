@@ -28,7 +28,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'mongo'
   s.add_dependency 'bson_ext'
   s.add_dependency 'chronic'
-  s.add_dependency 'rack-coffee'
   s.add_dependency 'redis'
   s.add_dependency 'sinatra'
   s.add_dependency 'i18n'
