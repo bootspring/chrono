@@ -30,7 +30,7 @@ class TestServer < MiniTest::Unit::TestCase
     result = Yajl::Parser.parse(last_response.body)
     assert_equal Array, result.class
     refute_equal 0, result.size
-    assert_equal Hash, result[0].class
+    assert_equal Array, result[0].class
     assert_equal 3, result[0].size, result[0].inspect
   end
   
