@@ -12,7 +12,7 @@ require 'tzinfo'
 module Chrono
   class Server < Sinatra::Base
     set :sessions, false
-    set :public, File.dirname(__FILE__) + '/../../public'
+    set :public, File.expand_path(File.dirname(__FILE__) + '/../../public')
 
     configure do
       Time.zone = TZInfo::Timezone.get("UTC")
