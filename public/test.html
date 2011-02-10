@@ -5,8 +5,33 @@
     <script type="text/javascript" src="/js/underscore-min.js"></script>
     <script type="text/javascript" src="/js/protovis.js"></script>
     <script type="text/javascript" src="/js/metrics.js"></script>
+    <style>
+      body { padding: 0; margin: 0; font-size: 12px;}
+      form { display: inline; }
+      #app_metric { float: right; }
+      #banner { padding: 5px; background: #eef }
+      #logo { font-size: 30px; }
+      #logo_box {"width: 200px; display: inline-block; }
+    </style>
   </head>
   <body>
+    <div id="banner">
+      <div id="logo_box">
+        <span id="logo">Chrono</span>
+      </div>
+      <form id="app_metric">
+        <div style="display: inline-block;">
+          <select name="application">
+            <option value="xyz">webstore</option>
+          </select>
+          <select name="metric">
+            <option value="cc_debits">cc_debits</option>
+            <option value="logins">logins</option>
+            <option value="searches">searches</option>
+          </select>
+        </div>
+      </form>
+    </div>
     <script type="text/javascript+protovis">
       initGraph();
     </script>

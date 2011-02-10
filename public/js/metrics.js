@@ -5,8 +5,8 @@ function stdev(array) {
 }
 
 function initGraph() {
-	var w = 960,
-	    h = 740,
+	var w = 900,
+	    h = 640,
 	    fill = pv.colors("lightblue", "darkgray", "lightpink");
 
 	var vis = new pv.Panel()
