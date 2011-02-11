@@ -1,3 +1,4 @@
+require 'erb'
 require 'mongo'
 require 'redis'
 require 'sinatra/base'
@@ -21,12 +22,15 @@ module Chrono
     end
     
     get '/' do
-      "Chrono v#{Chrono::VERSION}"
+      apps = master_db.collection('applications').find.to_a
+      token = app_token || apps.first['token']
+      metrics = redis.smembers("metrics-#{token}")
+      erb :index, {}, :apps => apps, :metrics => metrics
     end
 
     get '/apps' do
       apps = master_db.collection('applications')
-      apps.find.to_a.inspect
+      Yajl.dump(apps.find.to_a)
     end
 
     post '/apps' do
@@ -40,7 +44,7 @@ module Chrono
       authorize do
         content_type 'application/json'
         expires 300, :public
-        Yajl::Encoder.encode redis.smembers("metrics-#{app_token}")
+        Yajl.dump(redis.smembers("metrics-#{app_token}"))
       end
     end
 

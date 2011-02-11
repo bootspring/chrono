@@ -32,13 +32,15 @@
       </div>
       <form id="app_metric">
         <div style="display: inline-block;">
-          <select name="application">
-            <option value="xyz">webstore</option>
+          <select name='token' onchange="this.form.submit();">
+            <% apps.each do |app| %>
+            <option value='<%= app['token'] %>'><%= app['name'] %></option>
+            <% end %>
           </select>
           <select name="metric">
-            <option value="cc_debits">cc_debits</option>
-            <option value="logins">logins</option>
-            <option value="searches">searches</option>
+            <% metrics.each do |metric| %>
+            <option value="<%= metric %>"><%= metric %></option>
+            <% end %>
           </select>
         </div>
       </form>
