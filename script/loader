@@ -3,67 +3,26 @@
 require 'active_support/all'
 
 a = Time.now
-if ARGV[1] == 'raw'
-  require 'mongo'
-  conn = Mongo::Connection.new
-  db = conn.db('chrono_metrics_development')
-  coll = db.collection('cc_debits')
-  coll.create_index('at')
-  coll.remove
+require 'mongo'
+conn = Mongo::Connection.new
+db = conn.db('chrono_metrics_development')
+coll = db.collection('cc_debits')
+coll.create_index('at')
+coll.remove
 
-  # Create one year's worth of fake CC transaction data
-  docs = []
-  start = 1.year.ago.utc.to_i
-  start = start - (start % 3600)
-  now = Time.now.utc.to_i
-  current = start
-  while current < now
-    current += 3600
-    value = 20_000 + ((current % 86400)/2) + rand(5_000)
-    doc = { :k => 'cc_debits', :v => value, :at => Time.at(current).utc }
-    docs << doc
-  end
-  coll.insert(docs)
-  puts "Inserted #{docs.size} docs"
-else
-  require 'net/http'
-#  require 'net/http/persistent'
-  require 'yajl'
-
-  docs = []
-  SIZE = 20
-  SIZE.times do
-    docs << []
-  end
-  
-  op = 0
-  start = 1.year.ago.utc.to_i
-  start = start - (start % 3600)
-  now = Time.now.utc.to_i
-  current = start
-  while current < now
-    current += 3600
-    value = 20_000 + ((current % 86400)/2) + rand(5_000)
-    docs[(op % SIZE)] << Yajl.dump({ :k => 'cc_debits', :v => value, :at => current })
-    op += 1
-  end
-
-  threads = []
-  SIZE.times do |idx|
-    threads << Thread.new do 
-      uri = URI.parse 'http://localhost:9393/apps/xyz/metrics'
-      http = Net::HTTP.new(uri.host, uri.port)
-      post = Net::HTTP::Post.new uri.path
-    
-      docs[idx].each do |data|
-        post.body = data
-        http.request post
-        print '.'
-      end
-    end
-  end
-  threads.each(&:join)
-  puts "Inserted #{docs.size} docs"
+# Create one year's worth of fake CC transaction data
+docs = []
+start = 1.year.ago.utc.to_i
+start = start - (start % 3600)
+now = Time.now.utc.to_i
+current = start
+while current < now
+  current += 3600
+  value = 20_000 + ((current % 86400)/2) + rand(5_000)
+  doc = { :k => 'cc_debits', :v => value, :at => Time.at(current).utc }
+  docs << doc
 end
+coll.insert(docs)
+puts "Inserted #{docs.size} docs"
 b = Time.now
 puts "Completed in #{b - a} sec"

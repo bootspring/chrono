@@ -32,14 +32,9 @@
       </div>
       <form id="app_metric">
         <div style="display: inline-block;">
-          <select name='token' onchange="this.form.submit();">
-            <% apps.each do |app| %>
-            <option value='<%= app['token'] %>'><%= app['name'] %></option>
-            <% end %>
-          </select>
-          <select name="metric">
+          <select id="metric" name="metric">
             <% metrics.each do |metric| %>
-            <option value="<%= metric %>"><%= metric %></option>
+            <option value="<%= metric %>" selected><%= metric %></option>
             <% end %>
           </select>
         </div>
@@ -49,6 +44,9 @@
       <script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.js"></script>
       <script type="text/javascript+protovis">
         $(document).ready(function() {
+          initGraph();
+        });
+        $('#metric').change(function() {
           initGraph();
         });
       </script>

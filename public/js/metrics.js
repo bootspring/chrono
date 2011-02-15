@@ -15,9 +15,11 @@ function initGraph() {
 	    .margin(20)
 	    .right(40);
 
-	var dataURL = "/apps/xyz/metrics/cc_debits?start_time=1+day+ago&end_time=1+minute+ago&previous=5";
+	var metric = $('#metric :selected').val();
+
+	var dataURL = "/metrics/" + metric + "?start_time=1+day+ago&end_time=1+minute+ago&previous=5";
 	$.getJSON(dataURL, function(data) {
-	  var variables = ["cc_debits"];
+	  var variables = [metric];
 
 	  (function() {
 	    data[0].forEach(function(d, idx) {

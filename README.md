@@ -23,15 +23,13 @@ Installation and Usage
 
     gem install chrono
 
-The server and client are all included in the gem.  The server uses Sinatra + MongoDB + Redis.
+The server and client are all included in the gem.  The server uses Sinatra + MongoDB.
 
 On OSX, you can use Homebrew to install the required daemons:
 
     brew install mongodb
-    brew install redis
     
 	mongod run --config /usr/local/Cellar/mongodb/1.6.5-x86_64/mongod.conf
-	redis-server /usr/local/etc/redis.conf
 
 I use shotgun as my Rack server, to reload the code between requests for development purposes:
 

@@ -1,6 +1,5 @@
 require 'erb'
 require 'mongo'
-require 'redis'
 require 'sinatra/base'
 require 'yajl'
 require 'active_support/core_ext/time/zones'
@@ -22,40 +21,25 @@ module Chrono
     end
     
     get '/' do
-      apps = master_db.collection('applications').find.to_a
-      token = app_token || apps.first['token']
-      metrics = redis.smembers("metrics-#{token}")
-      erb :index, {}, :apps => apps, :metrics => metrics
+      erb :index, {}, :metrics => current_metrics
     end
 
-    get '/apps' do
-      apps = master_db.collection('applications')
-      Yajl.dump(apps.find.to_a)
-    end
-
-    post '/apps' do
-      apps = master_db.collection('applications')
-      apps.create_index('token', :unique => true)
-      apps.insert(params)
-      201
-    end
-
-    get '/apps/:token/metrics' do
+    get '/metrics' do
       authorize do
         content_type 'application/json'
         expires 300, :public
-        Yajl.dump(redis.smembers("metrics-#{app_token}"))
+        Yajl.dump(current_metrics)
       end
     end
 
-    post '/apps/:token/metrics' do
+    post '/metrics' do
       authorize do
         write
         201
       end
     end
 
-    get '/apps/:token/metrics/:name' do
+    get '/metrics/:name' do
       authorize do
         name = params['name']
         halt(401, "Invalid metric name: #{name}") if name !~ /\A\w+\Z/
@@ -78,7 +62,7 @@ module Chrono
       end
     end
 
-    delete '/apps/:token/metrics/:name' do
+    delete '/metrics/:name' do
       authorize do
         coll = metrics_db.collection(params['name'])
         coll.remove(query)
@@ -87,20 +71,17 @@ module Chrono
 
     private
     
-    def app_token
-      params['token']
-    end
-
     def authorize
-      return halt(401, 'No token provided') unless app_token
-
-      coll = master_db.collection('applications')
-      @app = coll.find_one('token' => app_token)
-      if app
-        yield
-      else
-        halt(402, 'Unauthorized, please verify token')
-      end
+      yield
+      # return halt(401, 'No token provided') unless app_token
+      # 
+      # coll = master_db.collection('applications')
+      # @app = coll.find_one('token' => app_token)
+      # if app
+      #   yield
+      # else
+      #   halt(402, 'Unauthorized, please verify token')
+      # end
     end
 
     def query(offset=0)
@@ -125,8 +106,6 @@ module Chrono
       doc = { :at => time(hash['at']), :v => hash['v'].to_f, :ip => ip(env['REMOTE_ADDR']), :k => hash['k'] }
       coll = metrics_db.collection(doc[:k])
       coll.insert(doc)
-    
-      redis.sadd("metrics-#{app_token}", hash['k'])
     end
       
     def write
@@ -143,18 +122,14 @@ module Chrono
       end
     end
     
-    def metrics_db
-      @metrics ||= Mongo::Connection.new
-      @metrics.db("chrono_metrics_#{environment}")
-    end
-
-    def master_db
-      @master ||= Mongo::Connection.new
-      @master.db("chrono_master_#{environment}")
+    def current_metrics
+      metrics_db.collections.reject { |c| c.name =~ /^system\./ }.map { |c| c.name }
     end
     
-    def redis
-      @redis ||= Redis.new
+    def metrics_db
+      p environment
+      @metrics ||= Mongo::Connection.new
+      @metrics.db("chrono_metrics_#{environment}")
     end
 
     def ip(str)
