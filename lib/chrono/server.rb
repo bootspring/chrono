@@ -127,7 +127,6 @@ module Chrono
     end
     
     def metrics_db
-      p environment
       @metrics ||= Mongo::Connection.new
       @metrics.db("chrono_metrics_#{environment}")
     end
